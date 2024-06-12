@@ -1,0 +1,10 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.pdf
+*.gz
+*synctex*
+/movement_modeling/
+/acoustics/
+
