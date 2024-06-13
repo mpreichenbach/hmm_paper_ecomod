@@ -56,13 +56,19 @@
 	
 	\section{Introduction}
 	
-	\section{Model Overview}
+
 	
-	In this study, we use a state-space model developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}, which uses a continuous-time correlated random-walk (CTCRW) model to predict carp locations at regular timesteps, followed by a hidden Markov model (HMM) to infer behavioral states as a function of environmental covariates. We fit models over three blocks of time: 1 minute, 5 minutes, and 30 minutes after the acoustic deterrent turned on.
-	
-	We used the R package \texttt{momentuHMM} \cite{McClintock2018} to fit the models, and performed spatial interpolations of sound intensity values with the kriging utilities in the \texttt{automap} package  \cite{Hiemstra2008}.
+	Important factors in animal behavior often vary continuously in space; these might include things like food availability, the velocity of wind or water currents, temperature, or sound intensity (which we will consider later). However, these values can only be sampled at spatially discrete points which are likely different than the positions in the animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
 	
 	\section{Model Description}
+	
+	\subsection{Model Overview}
+	
+	%	In this study, we use a state-space model developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}, which uses a continuous-time correlated random-walk (CTCRW) model to predict carp locations at regular timesteps, followed by a hidden Markov model (HMM) to infer behavioral states as a function of environmental covariates. We fit models over three blocks of time: 1 minute, 5 minutes, and 30 minutes after the acoustic deterrent turned on.
+	%	
+	%	We used the R package \texttt{momentuHMM} \cite{McClintock2018} to fit the models, and performed spatial interpolations of sound intensity values with the kriging utilities in the \texttt{automap} package  \cite{Hiemstra2008}.
+	
+	In this study, we combine a movement modeling framework developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018} with a kriging process to incorporate spatially continuous covariates. The movement modeling framework involves first fitting a continuous time correlated random walk (CTCRW) to animal telemetry data, which is used to predict temporally regular positions for each individual. With these temporally regular positions, the next step is to fit a Hidden Markov Model (HMM) to the movement tracks. The HMM allows one to predict behavioral states of individuals based on environmental covariates.
 	
 	\subsection{Continuous-time Correlated Random Walk (CTCRW)}
 	
