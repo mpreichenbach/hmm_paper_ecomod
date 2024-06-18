@@ -60,29 +60,28 @@
 	
 	\section{Model Description}
 	
-	\subsection{Model Overview}
+%	\subsection{Model Overview}
 	
 	%	In this study, we use a state-space model developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}, which uses a continuous-time correlated random-walk (CTCRW) model to predict carp locations at regular timesteps, followed by a hidden Markov model (HMM) to infer behavioral states as a function of environmental covariates. We fit models over three blocks of time: 1 minute, 5 minutes, and 30 minutes after the acoustic deterrent turned on.
 	%	
 	%	We used the R package \texttt{momentuHMM} \cite{McClintock2018} to fit the models, and performed spatial interpolations of sound intensity values with the kriging utilities in the \texttt{automap} package  \cite{Hiemstra2008}.
 	
-	In this study, we combine a movement modeling framework developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018} with a kriging process to incorporate spatially continuous covariates. The movement modeling framework involves first fitting a continuous time correlated random walk (CTCRW) to animal telemetry data, which is used to predict temporally regular positions for each individual. With these temporally regular positions, the next step is to fit a Hidden Markov Model (HMM) to the movement tracks. The HMM allows one to predict behavioral states of individuals based on environmental covariates.
+	In this study, we combine a movement modeling framework developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018} with a kriging process to incorporate spatially continuous covariates. The movement modeling framework involves first fitting a continuous-time correlated random walk (CTCRW) to animal telemetry data, followed by fitting a Hidden Markov Model (HMM), which allows one to predict the different behavioral states of individuals based on environmental covariates. The HMM requires animal positions to be temporally regular, but this is rarely true of animal telemetry time series, so the CTCRW provides a way to predict animal positions at regular time intervals.
+	
+	 In order to incorporate a spatially varying covariate into the HMM, we utilize the kriging interpolation technique to predict values of the covariate at the regular positions provided by the CTCRW step. We note that kriging is only one of many spatial interpolation techniques, but it provides the best linear unbiased estimator at unknown locations.
+	
 	
 	\subsection{Continuous-time Correlated Random Walk (CTCRW)}
 	
-	In our pond study (see Section \ref{sec:pond_study}), the telemetry data has an irregular timestep; however, hidden Markov models require a constant timestep. To ensure this, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
-	
-	The \texttt{crwMLE} function uses a Kalman filter to fit a continuous-time Ornstein-Uhlenbeck velocity process for each fish track, which is then integrated to form a location process. That is, for a given time-separation $\Delta$, the velocity $\nu_c(t)$ in the direction $c \in \{1, 2\}$ is modeled by the autoregressive equation
+	In most cases, animal telemetry data has an irregular timestep; however, HMMs require a regular timestep. We follow the methods introduced in \cite{Johnson2008} to fit a continuous-time Ornstein-Uhlenbeck velocity process for each animal track, which is then integrated to form a location process. That is, for a given regular time-interval $\Delta$, the velocity $\nu_c(t)$ in the direction $c \in \{1, 2\}$ is modeled by the autoregressive equation
 	\begin{align}
 		\nu_c(t + \Delta) := \gamma_c + e^{-\beta \Delta} (\nu_c(t) - \gamma_c) + \zeta_c(\Delta). \label{eqn:velocity}
 	\end{align}
-	Here, $\gamma_c$ is a mean-velocity parameter, $\beta$ is an autocorrelation parameter, and $\zeta_c(\Delta)$is a normal random variable with zero mean, and variance which grows with $\Delta$. Putting $\vec \nu(t) := [\nu_1(t), \nu_2(t)]^T$, and assuming that the velocity processes in each coordinate are independent, the continuous-time location process is given by
+	Here, $\gamma_c$ is a mean-velocity parameter, $\beta$ is an autocorrelation parameter, and $\zeta_c(\Delta)$is a normal random variable with zero mean, and variance which grows with $\Delta$. Putting $\vec \nu(t) := [\nu_1(t), \nu_2(t)]^T$, and assuming that the velocity processes $\nu_1(t), \nu_2(t)$ are independent, the continuous-time location process is given by
 	\begin{align}
 		\vec \mu(t) := \mu(0) + \int_0^t \vec \nu(u) \, du. \label{eqn:position}
 	\end{align}
 	In order to use the Kalman filter to estimate parameters, one can reformulate the processes (\ref{eqn:velocity}) and (\ref{eqn:position}) as a Gaussian linear state-space model for a univariate observation; the details are included in \cite{Johnson2008}.
-	
-	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} then predicts locations at the specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, a 2 second timestep was too frequent to allow model-fitting in a reasonable amount of time; instead, we opted to for a 6-second interval in the 30-minute models.
 	
 	\subsection{Hidden Markov Models (HMMs)}
 	
@@ -108,6 +107,10 @@
 	\section{Model Evaluation}
 	
 	\section{Application to a Pond Study} \label{sec:pond_study}
+	
+	To ensure this, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
+	
+	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} then predicts locations at the specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, a 2 second timestep was too frequent to allow model-fitting in a reasonable amount of time; instead, we opted to for a 6-second interval in the 30-minute models.
 	
 	\begin{figure}
 		\includegraphics[width=\textwidth]{track_states.png}
