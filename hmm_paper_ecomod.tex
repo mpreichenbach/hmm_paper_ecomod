@@ -81,15 +81,12 @@
 	\begin{align}
 		\vec \mu(t) := \mu(0) + \int_0^t \vec \nu(u) \, du. \label{eqn:position}
 	\end{align}
-	In order to use the Kalman filter to estimate parameters, one can reformulate the processes (\ref{eqn:velocity}) and (\ref{eqn:position}) as a Gaussian linear state-space model for a univariate observation; the details are included in \cite{Johnson2008}.
+	
+	Since telemetry data is collected at discrete times, and because the HMM model for behavioral states requires temporally regular data, it is best to reformulate the continuous-time model given in equations \eqref{eqn:velocity} and \eqref{eqn:position} as a discrete-time state-space model. This allows for quick estimation and smoothing using the Kalman filter; the details of this process are given in \cite{Johnson2008} and its appendices.
 	
 	\subsection{Hidden Markov Models (HMMs)}
 	
-	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
-	
-	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
-	
-	We fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $n$, but we investigated the case when $n = 2$. We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
+
 	
 	\subsection{Kriging}
 	
@@ -119,6 +116,12 @@
 	\end{figure}
 	
 	In the last two decades, methods to collect highly detailed data on animal movements have become easily accessible \cite{McConnell2010, Tomkiewicz2010}. This has led to rapid development in state-space models of animal behavior, and of tools to allow non-specialists to implement the models \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}.
+	
+	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
+	
+	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
+	
+	We fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $n$, but we investigated the case when $n = 2$. We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
 	
 	We used hidden Markov models to study the effect of environmental covariates on carp behavior; we were primarily interested in the effects of sound type ($100$hp boat-motor or the engineered signals) and sound intensity on carp behavior. There has been limited research on this topic, but one recent paper (Faulkner et al, unpublished) found that sound-types were associated with changes to the behavioral states of carp. However, the authors did not incorporate a sound intensity covariate.
 	
