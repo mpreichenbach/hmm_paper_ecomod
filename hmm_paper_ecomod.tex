@@ -58,7 +58,13 @@
 	
 	Important factors in animal behavior often vary continuously in space; these might include things like food availability, the velocity of wind or water currents, temperature, or sound intensity (which we will consider later). However, these values can only be sampled at spatially discrete points which are likely different than the positions in the animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
 	
-	\section{Model Description}
+	In the last two decades, methods to collect highly detailed data on animal movements have become easily accessible \cite{McConnell2010, Tomkiewicz2010}. This has led to rapid development in state-space models of animal behavior, and of tools to allow non-specialists to implement the models \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}.
+	
+	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
+	
+	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
+	
+	\section{Model Description} \label{sec:model-description}
 	
 %	\subsection{Model Overview}
 	
@@ -92,13 +98,13 @@
 	\[\Gamma = (\gamma_{ij}) = \begin{pmatrix} \gamma_{11} & \gamma_{21} & \cdots & \gamma_{n1} \\ \gamma_{12} & \gamma_{22} & \cdots & \gamma_{n2} \\ \vdots & \vdots & \ddots & \vdots \\ \gamma_{1n} & \gamma_{2n} &\cdots & \gamma_{nn} \end{pmatrix},\]
 	where $\gamma_{ij}$ is the probability that an individual changes from state $i$ to state $j$. In our notation, the matrix $\Gamma$ acts on the $N$-dimensional vectors of state probabilities via left-multiplication.
 	
-	It is often difficult to identify $N > 2$ meaningful states, so the most frequently used value is $N = 2$, which usually corresponds to a migratory-like state (``exploratory") and a more spatially restricted state (``encamped") \cite{McClintock2018}. In this case, the transition matrix is particularly simple and depends on only on the parameters $\gamma_{12}$ and $\gamma_{21}$:
+	It is often difficult to identify $N > 2$ meaningful states, so the most frequently used value is $N = 2$, which usually corresponds to a migratory-like state (``exploratory") and a more spatially restricted state (``encamped") \cite{McClintock2018}. In this case, the transition matrix is particularly simple and depends only on the parameters $\gamma_{12}$ and $\gamma_{21}$:
 	
 	\[\Gamma = \begin{pmatrix} 1 - \gamma_{12} & \gamma_{21} \\ \gamma_{12} & 1 - \gamma_{21} \end{pmatrix}\]
 	
 	\subsection{Kriging}
 	
-	In order to incorporate the sound intensity as a covariate in the predicted tracks, we used the spatial interpolation method known as \emph{kriging} from the R package \texttt{automap} \cite{Hiemstra2008}. Kriging is especially useful when interpolated values are assumed to have some spatial autocorrelation, like acoustic signal intensities in water will. Kriging has the benefit of being an ``exact interpolator", meaning that the value predicted for any observed location will equal the observed value. Additionally, the interpolated values from the kriging process will be the best linear unbiased predictors.
+	Kriging is especially useful when interpolated values are assumed to have some spatial autocorrelation, like acoustic signal intensities in water will. Kriging has the benefit of being an ``exact interpolator", meaning that the value predicted for any observed location will equal the observed value. Additionally, the interpolated values from the kriging process will be the best linear unbiased predictors.
 	
 	The kriging involves two steps: fitting a model to the variogram plot, then using this model to find weights which are used to interpolate missing values. The variogram plots half the mean-squared difference between the values at all pairs of points, against the distance between each pair. The \texttt{automap::autoKrige} function automatically determines which model fits the variogram best, by comparing fits of spherical, exponential, Gaussian, and a model from the Matern family of functions \cite{Hiemstra2008}. 
 	
@@ -112,36 +118,20 @@
 	\section{Model Evaluation}
 	
 	\section{Application to a Pond Study} \label{sec:pond_study}
+		
+	We used hidden Markov models to study the effect of environmental covariates on carp behavior; we were primarily interested in the effects of sound type (see Table \ref{tbl:pond_study} below) and sound intensity on carp behavior. There has been limited research on this topic, but one recent paper (Faulkner et al, unpublished) found that sound-types were associated with changes to the behavioral states of carp. However, the authors did not incorporate a sound intensity covariate.
 	
-	To ensure this, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
+	To better understand the effect of sound on carp behavior, we used telemetry and environmental data from a pond study conducted in $2018$. The study consisted of five trials, each lasting 72 hours. For each trial, each pond contained 20 silver carp, ten of whom had an acoustic telemetry tag which allowed us to gather location data of those individuals; the ten untagged individuals were included to promote schooling behavior. Between each trial, all fish were removed and replaced with new fish.
 	
-	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} then predicts locations at the specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, a 2 second timestep was too frequent to allow model-fitting in a reasonable amount of time; instead, we opted to for a 6-second interval in the 30-minute models.
+	Over the course of each trial, an underwater speaker played an acoustic deterrent sample on a loop for 30 minutes; this process was repeated once every 3 hours. In this paper, we refer to each time the deterrent turns on as a \emph{repetition}. There were 24 deterrent repetitions per trial, for a total of 120 over the course of the study. We investigated the effect of four different acoustic deterrents: ``Control", ``100hp", ``Saw", and ``Square". The ``Control" sample was silence, the ``100hp" sample was a recording of a 100hp boat motor, and both ``Saw" and ``Square" samples were artificially created for the purpose of this study.
 	
-	\begin{figure}
-		\includegraphics[width=\textwidth]{track_states.png}
-		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
-		\label{img:track_states}
-	\end{figure}
-	
-	In the last two decades, methods to collect highly detailed data on animal movements have become easily accessible \cite{McConnell2010, Tomkiewicz2010}. This has led to rapid development in state-space models of animal behavior, and of tools to allow non-specialists to implement the models \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}.
-	
-	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
-	
-	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
-	
-	We fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $n$, but we investigated the case when $n = 2$. We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
-	
-	We used hidden Markov models to study the effect of environmental covariates on carp behavior; we were primarily interested in the effects of sound type ($100$hp boat-motor or the engineered signals) and sound intensity on carp behavior. There has been limited research on this topic, but one recent paper (Faulkner et al, unpublished) found that sound-types were associated with changes to the behavioral states of carp. However, the authors did not incorporate a sound intensity covariate.
-	
-	We performed the data-processing and modeling in \texttt{R} \cite{Rlang2022}, primarily using the \texttt{momentuHMM} package \cite{McClintock2018} for location estimation and model fitting. We note that momentuHMM relies heavily on the \texttt{crawl} \cite{crawl} and \texttt{moveHMM} \cite{Michelot2016} packages.
-	
-	The study consisted of five trials, each lasting 72 hours. For each of the five trials, one of four acoustic deterrent treatments (Control, 100hp, Saw, and Square) was assigned to four ponds. The experimental design and trial durations are included in Table \ref{tbl:pond_study}.
+	Each trial utilized four experimental ponds, and the different acoustic deterrents were randomly assigned to different ponds for the duration of the trial. The experimental design and trial durations are included in Table \ref{tbl:pond_study}.
 	
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|}
 			\hline
-			\, & \thead{Pond 26} & \thead{Pond 27} & \thead{Pond 30} & \thead{Pond 31} \\
+			\thead{Trial \& Dates} & \thead{Pond 26} & \thead{Pond 27} & \thead{Pond 30} & \thead{Pond 31} \\
 			\hline
 			\makecell{\thead{Trial 1 \\ 6/11 to 6/14}} & Control & Square & 100hp & Saw \\
 			\hline
@@ -158,9 +148,21 @@
 		\label{tbl:pond_study}
 	\end{table}
 	
-	For each trial, each pond contained 20 silver carp, ten of whom had an acoustic telemetry tag which allowed us to gather large time series datasets of their locations. All fish were removed between trials, and new fish were placed in each pond.
+	\subsection{Software and Model Fitting}
 	
-	Over the course of each trial, an underwater speaker played the acoustic deterrent sample on a loop for 30 minutes; this process was repeated once every 3 hours. In this paper, we refer to each time the deterrent turns on as a \emph{repetition}. There were 24 deterrent repetitions per trial, for a total of 120 over the course of the study.
+	Following the model formulation given Section \ref{sec:model-description}, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
+	
+	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} then predicts locations at the specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, a 2 second timestep was too frequent to allow model-fitting in a reasonable amount of time; instead, we opted to for a 6-second interval in the 30-minute models.
+	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{track_states.png}
+		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
+		\label{img:track_states}
+	\end{figure}
+	
+	We fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $n$, but we investigated the case when $n = 2$. We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
+	
+	We performed the data-processing and modeling in \texttt{R} \cite{Rlang2022}, primarily using the \texttt{momentuHMM} package \cite{McClintock2018} for location estimation and model fitting. We note that momentuHMM relies heavily on the \texttt{crawl} \cite{crawl} and \texttt{moveHMM} \cite{Michelot2016} packages.
 	
 	\subsection{Covariates}
 	
@@ -185,6 +187,8 @@
 		\caption{Temperature readings for Pond 26 throughout the 2018 CERC study.}
 		\label{img:temperature}
 	\end{figure}
+	
+	In order to incorporate the sound intensity as a covariate in the predicted tracks, we used the spatial interpolation method known as \emph{kriging} from the R package \texttt{automap} \cite{Hiemstra2008}. 
 	
 	For our purposes, sound intensity readings (dB re 1 $\mu$Pa) were recorded once before the trials began, at 98 locations in each pond, and for each sound treatment except the Control. We used these values, along with an automatic kriging process, to interpolate sound intensity values which we incorporated into the movement tracks in each pond. Although there were 24 sound repetitions during the study study, intensity readings were not taken each time the sound turned on. Hence, we assumed that the readings taken before the the trials began were representative of the readings during each repetition. In order to incorporate reasonable values for sound intensity in the Control ponds, we sampled from a Gaussian random variable with parameters given in \cite{Wysocki2007} for a concrete pond.
 	
