@@ -150,13 +150,41 @@
 	
 	In order to investigate the short-term behavioral responses of the carp to the acoustic deterrents, we fit models to the telemetry data collected in the first minute of each sound repetition. To investigate their medium- and long-term behavioral responses, we fit models to the data collected in the first five minutes and the full $30$ minutes of each sound repetition, respectively. We will refer to these below as the ``1-minute", ``5-minute", and ``30-minute" models.
 	
+	In addition to the telemetry data, pond surface temperature and sound intensity were recorded in each pond. The surface temperature was recorded in each pond at 15-minute intervals; Figure \ref{img:temperature} shows the temperature recordings in each pond over the course of each trial:
+	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{pond_26_temp.png}
+		\caption{Temperature readings for Pond 26 throughout the 2018 CERC study.}
+		\label{img:temperature}
+	\end{figure}
+	
+	Sound intensity readings (dB re 1 $\mu$Pa) were recorded once before the trials began, at 98 locations in each pond, and for each sound treatment except the Control. Although there were 24 sound repetitions during the study study, intensity readings were not taken each time the sound turned on. Hence, we assumed that the readings taken before the the trials began were representative of the readings during each repetition. 		
+	
 	\subsection{Software for Movement Model Fitting}
+	
+	Our model-fitting process is given in Figure \ref{img:flowchart}; in this section we describe the process in more detail and describe the software we used in each step.
+	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{flowchart.png}
+		\caption{The model-fitting process.}
+		\label{img:flowchart}
+	\end{figure}
 		
 	We performed the data-processing and modeling in \texttt{R} \cite{Rlang2022}, primarily using the \texttt{momentuHMM} package \cite{McClintock2018} for location estimation and model fitting. We note that momentuHMM relies heavily on the \texttt{crawl} \cite{crawl} and \texttt{moveHMM} \cite{Michelot2016} packages.
 	
 	Following the model formulation given Section \ref{sec:model-description}, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
 	
 	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} predicts locations at specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, the HMMs could not be fitted in a reasonable amount of time using the $2$-second timestep, so we instead used a 6-second interval.
+	
+	We used these values, along with an automatic kriging process, to interpolate sound intensity values which we incorporated into the movement tracks in each pond. In order to incorporate reasonable values for sound intensity in the Control ponds, we sampled from a Gaussian random variable with parameters given in \cite{Wysocki2007} for a concrete pond.
+	
+	Figure \ref{img:intensities} shows interpolated sound intensity values in each pond from the kriging process.
+	
+	\begin{figure}[H]
+		\includegraphics[width=\textwidth]{intensities.png}
+		\caption{Interpolated sound intensity values from the kriging process.}
+		\label{img:intensities}
+	\end{figure}
 	
 	After fitting the CTCRWs to movement tracks and predicting the locations of individuals at regular time steps, we fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $N$ (see Section \ref{sec:hmm}), but we investigated the case when $N = 2$ for a number of reasons: models are easier to fit for small $N$, and because a visual inspection of the telemetry data showed that the carp exhibited two common behaviors, which denote ``encamped" and ``exploratory". We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
 	
@@ -176,25 +204,9 @@
 	
 	\subsubsection{Numerical Covariates} \label{sec:num-cov}
 	
-	Pond surface temperature was recorded throughout the study, at 15 minute intervals in each pond. However, our predicted location data has a much finer temporal resolution: 2 seconds for the two short-term datasets (1 minute and 5 minutes after the sound stimulus), and 6 seconds for the long-term dataset (30 minutes after the sound stimulus). We incorporated temperature values into these datasets by performing a linear interpolation between each recorded value. Figure \ref{img:temperature} shows the temperature recordings in each pond over the course of each trial.
-	
-	\begin{figure}
-		\includegraphics[width=\textwidth]{pond_26_temp.png}
-		\caption{Temperature readings for Pond 26 throughout the 2018 CERC study.}
-		\label{img:temperature}
-	\end{figure}
-	
+	 However, our predicted location data has a much finer temporal resolution: 2 seconds for the two short-term datasets (1 minute and 5 minutes after the sound stimulus), and 6 seconds for the long-term dataset (30 minutes after the sound stimulus). We incorporated temperature values into these datasets by performing a linear interpolation between each recorded value.
+	 
 	In order to incorporate the sound intensity as a covariate in the predicted tracks, we used the spatial interpolation method known as \emph{kriging} from the R package \texttt{automap} \cite{Hiemstra2008}. The \texttt{automap::autoKrige} function automatically determines which model fits the variogram best, by comparing fits of spherical, exponential, Gaussian, and a model from the Matern family of functions \cite{Hiemstra2008}.
-	
-	For our purposes, sound intensity readings (dB re 1 $\mu$Pa) were recorded once before the trials began, at 98 locations in each pond, and for each sound treatment except the Control. We used these values, along with an automatic kriging process, to interpolate sound intensity values which we incorporated into the movement tracks in each pond. Although there were 24 sound repetitions during the study study, intensity readings were not taken each time the sound turned on. Hence, we assumed that the readings taken before the the trials began were representative of the readings during each repetition. In order to incorporate reasonable values for sound intensity in the Control ponds, we sampled from a Gaussian random variable with parameters given in \cite{Wysocki2007} for a concrete pond.
-	
-	Figure \ref{img:intensities} shows interpolated sound intensity values in each pond from the kriging process.
-	
-	\begin{figure}[H]
-		\includegraphics[width=\textwidth]{intensities.png}
-		\caption{Interpolated sound intensity values from the kriging process.}
-		\label{img:intensities}
-	\end{figure}		
 	
 	\subsection{Top Models by AIC Score}
 	
