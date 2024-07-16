@@ -104,7 +104,9 @@
 	
 	\subsection{Kriging} \label{sec:kriging}
 	
-	Kriging is especially useful when interpolated values are assumed to have some spatial autocorrelation, like acoustic signal intensities in water will. Kriging has the benefit of being an ``exact interpolator", meaning that the value predicted for any observed location will equal the observed value. Additionally, the interpolated values from the kriging process will be the best linear unbiased predictors.
+	In this paper, we introduce a process for incorporating spatially continuous environmental covariates into commonly used movement models. Specifically, we describe how to incorporate interpolated values of covariates into the HMM framework given above. By ``interpolation", we mean using some method of predicting the value of an environmental variable at an unsampled location. Given that the animal locations predicted by the CTCRW will rarely (if ever) occur the same locations where a relevant environmental variable was sampled, some method of interpolation is necessary to incorporate the environmental variable as a covariate in the HMM.
+	
+	There are many different interpolation methods, and the choosing the correct method will require some understanding of the environmental variable being interpolated. The framework we describe here for incorporating the interpolated values into the time series of predicted locations from the CTCRW will work for any interpolation method. However, in this paper we will consider the particular method of ``kriging", because it is widely used in the environmental sciences. Additionally, kriging has a number of technical benefits: it is especially useful when values are assumed to have some spatial autocorrelation, it is an ``exact interpolator", meaning that the value predicted for any observed location will equal the observed value, and the interpolated values from the kriging process will be the best linear unbiased predictors.
 	
 	The kriging involves two steps: fitting a model to the variogram plot, then using this model to find weights which are used to interpolate missing values. The variogram plots half the mean-squared difference between the values at all pairs of points, against the distance between each pair. 
 	
@@ -115,9 +117,13 @@
 	\end{align*}
 	Details on how the weights $w_i(x_0)$ at a given point are computed are given in \cite{Bailey1995}.
 	
+	In order to incorporate the interpolated values into the HMM for behavioral states, one can simply evaluate the function $\hat z$ from the kriging process at each location predicted by the CTCRW. This will give an interpolated value of the environmental variable at each predicted location of the individuals, which is a necessary step when the variable can only be sampled at finitely many points.
+	
+	In the application we describe in Section \ref{sec:pond-study}, we use kriging to interpolate underwater sound intensity values in order to quantify the behavioral response of invasive carp to acoustic deterrents. A number of other researchers have successfully used kriging to interpolate sound intensities, both in air \cite{Baume2008, Bostanci2018} and in water \cite{Sun2018}.
+	
 	\section{Model Evaluation}
 	
-	\section{Application to a Pond Study} \label{sec:pond_study}
+	\section{Application to a Pond Study} \label{sec:pond-study}
 		
 	We used hidden Markov models to study the effect of environmental covariates on carp behavior; we were primarily interested in the effects of sound type (see Table \ref{tbl:pond_study} below) and sound intensity on carp behavior. There has been limited research on this topic, but one recent paper (Faulkner et al, unpublished) found that sound-types were associated with changes to the behavioral states of carp. However, the authors did not incorporate a sound intensity covariate.
 	
