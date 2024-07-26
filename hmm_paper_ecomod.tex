@@ -66,7 +66,7 @@
 	
 	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
 	
-	\section{Model Description} \label{sec:model-description}
+	\section{Model Description} \label{sec:model_description}
 	
 %	\subsection{Model Overview}
 	
@@ -110,11 +110,9 @@
 	
 	There are many different interpolation methods, and the choosing the correct method will require some understanding of the environmental variable being interpolated. The framework we describe here for incorporating the interpolated values into the time series of predicted locations from the CTCRW will work for any interpolation method. However, in this paper we will consider the particular method of ``kriging", because it is widely used in the environmental sciences. Additionally, kriging has a number of technical benefits: it is especially useful when values are assumed to have some spatial autocorrelation, it is an ``exact interpolator", meaning that the value predicted for any observed location will equal the observed value, and the interpolated values from the kriging process will be the best linear unbiased predictors.
 	
-	The kriging involves two steps: fitting a model to the variogram plot, then using this model to find weights which are used to interpolate missing values. The variogram plots half the mean-squared difference between the values at all pairs of points, against the distance between each pair. 
-	
-	Using whichever models fits the variogram best, the weights $w_i = w_i(x_0)$ can be calculated for each any unobserved point $x_0$, and the interpolated value $\hat z(x_0)$ is then a linear combination of these weights with the observed values $z(x_i)$, for $i = 1, \ldots, n$:
+	The kriging involves two steps: fitting a model to the variogram plot, then using this model to find weights which are used to interpolate missing values. The variogram plots half the mean-squared difference between the values at all pairs of points, against the distance between each pair. Using whichever models fits the variogram best, weights $w_i = w_i(x_0)$ can be calculated for each any unobserved point $x_0$, and the interpolated value $\hat z(x_0)$ is then a linear combination of these weights with the observed values $z(x_i)$, for $i = 1, \ldots, n$:
 	\begin{align*}
-		\hat z(x_0) &= \begin{bmatrix} w_1 & w_2 & \cdots & w_n \end{bmatrix} \begin{bmatrix} z(x_1) \\ z(x_2) \\ \vdots \\ z(x_n) \end{bmatrix} \\
+		\hat z(x_0) &= \begin{bmatrix} w_1(x_0) & w_2(x_0) & \cdots & w_n(x_0) \end{bmatrix} \begin{bmatrix} z(x_1) \\ z(x_2) \\ \vdots \\ z(x_n) \end{bmatrix} \\
 		&= \sum_{i = 1}^n w_i(x_0) z(x_i)
 	\end{align*}
 	Details on how the weights $w_i(x_0)$ at a given point are computed are given in \cite{Bailey1995}.
@@ -127,9 +125,9 @@
 	
 	\section{Application to a Pond Study} \label{sec:pond-study}
 		
-	We used hidden Markov models to study the effect of environmental covariates on carp behavior; we were primarily interested in the effects of sound type (see Table \ref{tbl:pond_study} below) and sound intensity on carp behavior. There has been limited research on this topic, but one recent paper (Faulkner et al, unpublished) found that sound-types were associated with changes to the behavioral states of carp. However, the authors did not incorporate a sound intensity covariate.
-	
-	To better understand the effect of sound on carp behavior, we used telemetry and environmental data from a pond study conducted in $2018$. The study consisted of five trials, each lasting 72 hours. For each trial, each pond contained 20 silver carp, ten of whom had an acoustic telemetry tag which allowed us to gather location data of those individuals; the ten untagged individuals were included to promote schooling behavior. Between each trial, all fish were removed and replaced with new fish.
+	We used the telemetry and environmental data collected in a 2018 pond study to investigate the effects of continuous variables on carp behavior: we were primarily interested in the effects of and sound intensity on carp behavior, but we also interpolate pond temperature values. We use these variables to demonstrate the framework for incorporating interpolated data described in Section \ref{sec:model_description}. A recent paper (Faulkner et al, unpublished) using the same data and similar methods found that sound-types were associated with changes to the behavioral states of carp using a similar modeling framework to what we propose. However, the authors did not incorporate a sound intensity covariate (measured in decibels) or temperature; they only used the categorical variable of sound types given in Table \ref{tbl:pond_study}.
+		
+	In the summer of 2018, researchers from USGS and USACE conducted a pond study at the Columbia Environmental Research Center to better understand the effect of acoustic deterrents on invasive carp behavior. The study consisted of five trials in four ponds, each lasting 72 hours. For each trial, each pond contained 20 silver carp, ten of whom had an acoustic telemetry tag which allowed us to gather location data of those individuals; the ten untagged individuals were included to promote schooling behavior. Between each trial, all carp were removed and replaced with new carp.
 	
 	Over the course of each trial, an underwater speaker played an acoustic deterrent sample on a loop for 30 minutes; this process was repeated once every 3 hours. In this paper, we refer to each time the deterrent turns on as a \emph{repetition}. There were 24 deterrent repetitions per trial, for a total of 120 over the course of the $5$ trials during the study. We investigated the effect of four different acoustic deterrents: ``Control", ``100hp", ``Saw", and ``Square". The ``Control" sample was silence, the ``100hp" sample was a recording of a 100hp boat motor, and both ``Saw" and ``Square" samples were artificially created for the purpose of this study.
 	
@@ -158,15 +156,14 @@
 	
 	In order to investigate the short-term behavioral responses of the carp to the acoustic deterrents, we fit models to the telemetry data collected in the first minute of each sound repetition. To investigate their medium- and long-term behavioral responses, we fit models to the data collected in the first five minutes and the full $30$ minutes of each sound repetition, respectively. We will refer to these below as the ``1-minute", ``5-minute", and ``30-minute" models.
 	
-	In addition to the telemetry data, pond surface temperature and sound intensity were recorded in each pond. The surface temperature was recorded in each pond at 15-minute intervals; Figure \ref{img:temperature} shows the temperature recordings in each pond over the course of each trial:
-	
 	\begin{figure}
 		\includegraphics[width=\textwidth]{pond_26_temp.png}
 		\caption{Temperature readings for Pond 26 throughout the 2018 CERC study.}
 		\label{img:temperature}
 	\end{figure}
-	
-	Sound intensity readings (dB re 1 $\mu$Pa) were recorded once before the trials began, at 98 locations in each pond, and for each sound treatment except the Control. Although there were 24 sound repetitions during the study study, intensity readings were not taken each time the sound turned on. Hence, we assumed that the readings taken before the the trials began were representative of the readings during each repetition. 		
+		
+	In addition to the telemetry data, pond surface temperature and sound intensity were recorded in each pond. 	
+	Sound intensity readings (dB re 1 $\mu$Pa) were recorded once before the trials began, at 98 locations in each pond, and for each sound treatment except the Control. Although there were 24 sound repetitions during the study study, intensity readings were not taken each time the sound turned on. Hence, we assumed that the readings taken before the the trials began were representative of the readings during each repetition. The surface temperature was recorded in each pond at 15-minute intervals; Figure \ref{img:temperature} shows the temperature recordings in each pond over the course of each trial.		
 	
 	\subsection{Software for Movement Model Fitting}
 	
@@ -180,11 +177,11 @@
 		
 	We performed the data-processing and modeling in \texttt{R} \cite{Rlang2022}, primarily using the \texttt{momentuHMM} package \cite{McClintock2018} for location estimation and model fitting. We note that momentuHMM relies heavily on the \texttt{crawl} \cite{crawl} and \texttt{moveHMM} \cite{Michelot2016} packages.
 	
-	Following the model formulation given Section \ref{sec:model-description}, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
+	Following the model formulation given Section \ref{sec:model_description}, we first fit a CTCRW model to the telemetry data, and used it to predict fish locations at a regular time step. To do this, we used the \texttt{crawlWrap} functions from the \texttt{momentuHMM} package \cite{McClintock2018}. This function is itself a wrapper of the \texttt{crwMLE} and \texttt{crwPredict} functions from the \texttt{crawl} package \cite{crawl}.
 	
 	Using the fitted-model output of \texttt{crwMLE}, the function \texttt{crwPredict} predicts locations at specified timesteps \cite{crawl, Johnson2008}. For the 1-minute and 5-minute models, we used a timestep of 2 seconds, which is close to the average timestep in the telemetry data. For the 30-minute models, the HMMs could not be fitted in a reasonable amount of time using the $2$-second timestep, so we instead used a 6-second interval.
 	
-	We used these values, along with an automatic kriging process, to interpolate sound intensity values which we incorporated into the movement tracks in each pond. In order to incorporate reasonable values for sound intensity in the Control ponds, we sampled from a Gaussian random variable with parameters given in \cite{Wysocki2007} for a concrete pond.
+	In order to incorporate sound intensity at specific locations as a covariate in the predicted tracks, we used the spatial interpolation method known as \emph{kriging} (see the brief description in Section \ref{sec:kriging} from the R package \texttt{automap} \cite{Hiemstra2008}. The \texttt{automap::autoKrige} function automatically determines which model fits the variogram best among a collection of spherical, exponential, Gaussian, and a model from the Matern family of functions \cite{Hiemstra2008}. In order to incorporate reasonable values for sound intensity in the Control ponds, we sampled from a Gaussian random variable with parameters given in \cite{Wysocki2007} for a silent concrete pond.
 	
 	Figure \ref{img:intensities} shows interpolated sound intensity values in each pond from the kriging process.
 	
@@ -194,27 +191,21 @@
 		\label{img:intensities}
 	\end{figure}
 	
-	After fitting the CTCRWs to movement tracks and predicting the locations of individuals at regular time steps, we fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $N$ (see Section \ref{sec:hmm}), but we investigated the case when $N = 2$ for a number of reasons: models are easier to fit for small $N$, and because a visual inspection of the telemetry data showed that the carp exhibited two common behaviors, which denote ``encamped" and ``exploratory". We modeled the step lengths as as Gamma distributions, and the turning angles as von Mises distributions.
+	After fitting the CTCRWs to movement tracks and predicting the locations of individuals at regular time steps, we fit HMMs using the \texttt{fitHMM} function from the \texttt{momentuHMM} package. These models consist of probability distributions for step lengths and turning angle for each state, and a state transition matrix. In general, HMMs may consist of an arbitrary number of states $N$ (see Section \ref{sec:hmm}), but we investigated the case when $N = 2$ for a number of reasons: models are easier to fit for small $N$, and because a visual inspection of the telemetry data showed that the carp exhibited two common behaviors, which we denote by ``encamped" and ``exploratory". We modeled the step lengths as Gamma distributions, and the turning angles as von Mises distributions; the \texttt{momentuHMM} package provides other options as needed.
 	
-	\subsection{Covariates}
+	\subsection{Environmental Covariates}
 	
-	We explored the effect of five covariates on carp behavior, \emph{Trial, Treatment, Diel, Temperature, and Intensity}, by modeling the step length means and state transition probabilities as linear functions of the covariates. We only included Diel as a covariate in model formulas when sunrise and sunset occur during the same sound repetition. For the sound repetitions in which that occurs, we fit a total of 32 models, and for the sound repetitions in which a sunrise or sunset does not occur, we fit 16 models. These values come from the fact that
-	\[2^n = \sum_{i=0}^n {n \choose i},\]
-	where $i$ is the number of covariates to include in a formula. For the sound repetitions which contain a sunrise or sunset, we use all five covariates, so $n = 5$ covariates. Otherwise, we ignore the formulas with Diel, in which case $n = 4$. Also, we take $i = 0$ to be the intercept-only formula $\sim$1.
+	We explored the effect of five covariates on carp behavior, \emph{Trial, Treatment, Diel, Temperature, and Intensity}, by modeling the mean step length, mean turning angles, and the state transition probabilities as linear functions of the covariates.	We only included Diel as a covariate in model formulas when sunrise and sunset occur during the same sound repetition. For the sound repetitions in which that occurs, we fit a total of 32 models, and for the sound repetitions in which a sunrise or sunset does not occur, we fit 16 models. These values come from the fact that
+	\begin{align}
+		2^n = \sum_{i=0}^n {n \choose i}, \label{eqn:formula_count}
+	\end{align}
+	where $i$ is the number of covariates to include in a formula. For example, the formula $\sim \! \text{Trial+Intensity}$ means that the movement model parameters were modeled as linear functions of the trial and sound intensity, whereas $\sim \! \text{Temperature}$ means the parameters were modeled as a linear function of temperature only. For the sound repetitions which contain a sunrise or sunset, we use all five covariates, so $n = 5$ in \eqref{eqn:formula_count}. Otherwise, we ignore the formulas with Diel, in which case $n = 4$. Also, we take $i = 0$ to be the intercept-only formula $\sim \! 1$.
 	
-	The parameters of the HMMs which we modeled as linear functions of the covariates were the mean step lengths, $\mu_1$ and $\mu_2$; the mean turning angles, $\theta_1$ and $\theta_2$, and the state transition probabilities $\lambda_{1 \to 2}$ and $\lambda_{2 \to 1}$. Here, $\mu_i$ and $\theta_i$ are the mean step length and turning angle, respectively, for behavioral state $i = 1, 2$, and $\lambda_{i, j}$ denotes the probability that an individual switches from state $i$ to state $j$ during the time step, which were modeled as multinomial logit functions \cite{Michelot2016}. We used the intercept-only formula $\sim$1 to model the shape parameters of the Gamma and von Mises distributions in each HMM.
+	The parameters of the HMMs which we modeled as linear functions of the covariates were the mean step lengths, $\mu_1$ and $\mu_2$; the mean turning angles, $\theta_1$ and $\theta_2$, and the state transition probabilities $\lambda_{1,2}$ and $\lambda_{2, 1}$. Here, $\mu_i$ and $\theta_i$ are the mean step length and turning angle, respectively, for behavioral state $i = 1, 2$, and $\lambda_{i, j}$ denotes the probability that an individual switches from state $i$ to state $j$ during the time step, which were modeled as multinomial logit functions \cite{Michelot2016}. We used the intercept-only formula $\sim \! 1$ to model the shape parameters of the Gamma and von Mises distributions in each HMM.
 	
-	\subsubsection{Factor Covariates}
+	The \emph{Trial} covariate has five levels which correspond to the trial in the study: 1, 2, 3, 4, and 5. The \emph{Treatment} covariate has four levels which correspond to the type of acoustic deterrent played in the ponds, namely Control, 100hp, Saw, and Square. Details of the \emph{Trial} and \emph{Treatment} covariates within the pond study are included in Table \ref{tbl:pond_study}.
 	
-	The \emph{Trial} covariate has five levels which correspond to the trial in the study: 1, 2, 3, 4, and 5. The \emph{Treatment} covariate has four levels which correspond to the type of acoustic deterrent played in the ponds, namely Control, 100hp, Saw, and Square. Details of the \emph{Trial} and \emph{Treatment} are included in Table \ref{tbl:pond_study}.
-	
-	The \emph{Diel} covariate has two levels, Day and Night. We defined Day to mean that a data point occurred after local sunrise and before local sunset on the same day, and Night to mean that a data point occurred after local sunset and before local sunrise on the following day. We only fit models with formulas including the Diel covariate when sunrise or sunset occurred within the particular dataset. This never occurs in the 1 minute datasets, only in Repetitions 1 \& 9 for the 5 minute datasets, and Repetitions 1, 9, \& 17 in the 30 minute datasets.
-	
-	\subsubsection{Numerical Covariates} \label{sec:num-cov}
-	
-	 However, our predicted location data has a much finer temporal resolution: 2 seconds for the two short-term datasets (1 minute and 5 minutes after the sound stimulus), and 6 seconds for the long-term dataset (30 minutes after the sound stimulus). We incorporated temperature values into these datasets by performing a linear interpolation between each recorded value.
-	 
-	In order to incorporate the sound intensity as a covariate in the predicted tracks, we used the spatial interpolation method known as \emph{kriging} from the R package \texttt{automap} \cite{Hiemstra2008}. The \texttt{automap::autoKrige} function automatically determines which model fits the variogram best, by comparing fits of spherical, exponential, Gaussian, and a model from the Matern family of functions \cite{Hiemstra2008}.
+	The \emph{Diel} covariate has two levels, Day and Night. We defined Day to mean that a data point occurred after local sunrise and before local sunset on the same day, and Night to mean that a data point occurred after local sunset and before local sunrise on the following day. We only fit models with formulas including the Diel covariate when sunrise or sunset occurred within the particular time range (either 1-minute, 5-minutes, or 30-minutes after a deterrent repetition). This never occurs in the 1-minute datasets, only in Repetitions 1 \& 9 for the 5-minute datasets, and only in Repetitions 1, 9, \& 17 in the 30-minute datasets.
 	
 	\subsection{Top Models by AIC Score}
 	
