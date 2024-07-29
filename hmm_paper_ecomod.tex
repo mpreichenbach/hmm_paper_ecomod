@@ -209,13 +209,13 @@
 	
 	\subsection{Top Models by AIC Score}
 	
-	In order to determine whether sound intensity was a good predictor of carp behavior, we first determined the frequency of the \emph{dB} covariate among the top model formulas for the 24 repetitions. For each sound repetition, and for each time-interval (1 minute, 5 minute, and 30 minutes after the sound exposure), we determined the top model according to Akaike's Information Criterion, or AIC score. Table \ref{tbl:aic_scores} records the formulas of these top models; to simplify notation, we write \emph{dB}, \emph{Trt}, and \emph{Temp} in place of \emph{Intensity, Treatment, and Temperature}, respectively.
+	In order to determine whether sound intensity was a good predictor of carp behavior, we first determined how frequently the \emph{dB} covariate among the top model formulas for the 24 repetitions. For each sound repetition, and for each time-interval (1 minute, 5 minute, and 30 minutes after the sound exposure), we determined the top model according to Akaike's Information Criterion, otherwise known as the AIC score. Table \ref{tbl:aic_scores} records the formulas of these top models; to simplify notation, we write \emph{dB}, \emph{Trt}, and \emph{Temp} in place of \emph{Intensity, Treatment, and Temperature}, respectively.
 	
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{|c|c|c|c|}
 			\hline
-			\thead{Repetition} & \thead{1 min.} & \thead{5 min.} & \thead{30 min.} \\
+			\thead{Repetition} & \thead{Top $1$-min. \\ model} & \thead{Top $5$-min. \\ model} & \thead{Top $30$-min. \\ model} \\
 			\hline
 			1 & $\sim$Trial+Temp+Trt & $\sim$Trial+Temp+Diel+Trt & $\sim$Trial+Trt \\
 			\hline
@@ -270,13 +270,13 @@
 		\label{tbl:aic_scores}
 	\end{table}
 	
-	Given that only a few model formulas occur in the top models, the table in Figure \ref{tbl:aic_scores} is summarized in the formula frequency table in Figure \ref{tbl:frm_freq}:
+	Given that only a few different formulas occur in the top models, the table in Figure \ref{tbl:aic_scores} is summarized in the formula frequency table in Figure \ref{tbl:frm_freq}:
 	
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{|c|c|c|c|c|}
 			\hline
-			\thead{Formula} & \makecell{\thead{1min \\ Frequency}} & \makecell{\thead{5min \\ Frequency}} & \makecell{\thead{30min \\ Frequency}} & \thead{Total} \\
+			\thead{Formula} & \makecell{\thead{$1$-min \\ Frequency}} & \makecell{\thead{$5$-min \\ Frequency}} & \makecell{\thead{$30$-min \\ Frequency}} & \thead{Total} \\
 			\hline
 			$\sim$Trial+Trt & 13 & 12 & 9 & 34 \\
 			\hline
@@ -305,7 +305,7 @@
 		\centering
 		\begin{tabular}{|c|c|c|c|}
 			\hline
-			\thead{Covariate} & \makecell{\thead{1min \\ Frequency}} & \makecell{\thead{5min \\ Frequency}} & \makecell{\thead{30min \\ Frequency}} \\
+			\thead{Covariate} & \makecell{\thead{$1$-min \\ Frequency}} & \makecell{\thead{$5$-min \\ Frequency}} & \makecell{\thead{$30$-min \\ Frequency}} \\
 			\hline
 			Trial & 0.9583 & 1.0000 & 1.0000 \\
 			\hline
@@ -322,13 +322,17 @@
 		\label{tbl:cov_freq}
 	\end{table}
 	
+	From this table, we can see that the Trial and Treatment covariates are the strongest predictors of carp behavioral changes, because they occur in more than $87.5\%$ of the top models. The next strongest predictor is pond temperature (Temp), which appears in more top models for the $30$-minute datasets than in the shorter datasets. Intuitively, this makes sense given that temperature changes will vary more over a $30$-minute interval than over either $1$-minute or $5$-minutes intervals. 
+	
+	One of the worst predictors was sound intensity (dB), though Table \ref{tbl:cov_freq} suggests that it might be a better predictor over shorter time frames. This could be explained by the fact that carp have an initial reaction to the sound deterrent, but become more habituated to it over time. The weakness of the dB covariate as a predictor could also be explained by the fact that sound intensities were recorded once before any of the trials began. In order to incorporate it into the movement model, we assumed that those recorded values, and hence the interpolated values in the ponds derived via kriging, were consistent across all $24$ repetitions of the deterrent. We describe improvements to this study design in Section \ref{sec:conclusion}.
+	
 	\subsection{State Transition Probabilities}
 	
-	\begin{figure}
-		\includegraphics[width=\textwidth]{track_states.png}
-		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
-		\label{img:track_states}
-	\end{figure}
+%	\begin{figure}
+%		\includegraphics[width=\textwidth]{track_states.png}
+%		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
+%		\label{img:track_states}
+%	\end{figure}
 	
 	To determine whether the covariate \emph{dB} had a common effect on carp behavior, we investigated plots of the state transition probabilities $\lambda_{i, j}$, with $i, j \in \{1, 2\}$, as a function of dB (re 1 $\mu$Pa). The probabilities $\lambda_{i, j}$ are modeled as multinomial logit functions, the details of which are given in \cite{Michelot2016}. These plots indicate how the probability of changing behavioral states is correlated with changes to dB levels in the pond. Recall that $\lambda_{i, j}$ gives the probability that an individual will be in behavioral state $j$ at time $n+1$, given that they are in behavioral state $i$ at time $n$. Also, since we only consider two behavioral states, we have the identities
 	\begin{align*}
@@ -431,15 +435,19 @@
 	
 	The top model for this repetition was $\sim$Trial+dB+Treatment, and higher dB values were not strongly associated with any behavioral patterns. The parameters $\lambda_{1, 1}$ and $\lambda_{2, 2}$ were near 1 throughout the range of dB values in the data; equivalently, the parameters $\lambda_{1, 2}$ and $\lambda_{2, 1}$ were near zero in the same range. In other words, individuals were highly likely to stay in the same state regardless of the dB level they experienced.
 	
-	\section{Conclusion}
+	\section{Conclusion} \label{sec:conclusion}
 	
-	We investigated the effect of acoustic deterrents on carp behavior, by fitting hidden Markov models with many different combinations of environmental covariates to datasets for three different time frames: for 1, 5, and 30 minutes after the deterrent turned on. We did this for 24 separate ``repetitions" of the deterrents over the course of 3-day trials. To determine whether acoustic deterrents were effective at changing carp behavior, we tabulated the covariates which appear in the 24 top models (see Figures \ref{tbl:aic_scores} and \ref{tbl:frm_freq}), and by analyzing the qualitative patterns in plots of the behavioral state transition probabilities.
+	In this paper, we proposed a method to incorporate continuous environmental variables into movement models based on continuous time correlated random walks (CTCRWs) and hidden Markov models (HMMs). These movement models are widely used in ecology, and allow for animal behavior patterns to be closely studied, as functions of environmental covariates. However, many of these covariates are spatially or temporally continuous, but can only be sampled at discrete times or locations. In order to merge these important variables with the telemetry data for the purpose of movement modeling, we proposed a method to merge the environment variables into the telemetry time series by spatial and temporal interpolation (see Figure \ref{img:flowchart}).
 	
-	The values in Table \ref{tbl:cov_freq} suggest that the Trial and Treatment (\emph{Trt}) covariates are the strongest predictors of behavior in the models, with Temperature becoming a stronger predictor during longer time frames. However, the primary covariate of interest for this study, dB, appears to be the weakest predictor of behavior as it never occurs in more than 4/24 of the formulas of the top models. Additionally, Table \ref{tbl:cov_freq} provides some indication that dB is a poorer predictor over longer time frames, perhaps because individuals become habituated to the acoustic deterrents. 
+	To demonstrate our proposed technique, we studied the effect of sound intensity of acoustic deterrents, and pond temperature, on the behavior of an invasive carp species. Sound intensity, measured in $dB$, is a spatially continuous variable for which we used the kriging method to interpolate values at unknown locations. Pond surface temperature was a temporally continuous variable, because we assumed it to be constant throughout the pond. Due to the frequent sampling rates of surface temperature in the study (see \ref{img:temperature}), we used simple linear interpolation to incorporate it into the temporally regular time series output by the CTCRW.
+	
+	In addition to the sound intensity and temperature covariates, we also incorporated categorical variables like the trial number, deterrent sound type, and diel into the time series of predicted carp locations. We then fit hidden Markov models with all linear combinations of these environmental covariates for three subsets of the time series: $1$, $5$, and $30$ minutes after the deterrent turned on. We did this for each of the $24$ separate ``repetitions" of the deterrents over the course of the five trials. To determine whether acoustic deterrents were effective at changing carp behavior, we tabulated the covariates which appear in the $24$ top models (see Figures \ref{tbl:aic_scores} and \ref{tbl:frm_freq}), and by analyzing the qualitative patterns in plots of the behavioral state transition probabilities.
+	
+	The values in Table \ref{tbl:cov_freq} suggest that the Trial and Treatment (\emph{Trt}) covariates are the strongest predictors of behavior in the models, with Temperature becoming a stronger predictor during longer time frames. However, sound intensity (dB) appears to be the weakest predictor of behavior out of the variables included in models for each repetition (diel was included in only a small subset of repetitions). Additionally, Table \ref{tbl:cov_freq} provides some indication that dB is a poorer predictor over longer time frames, perhaps because individuals become habituated to the acoustic deterrents. 
 	
 	For the sound repetitions in which dB occurred as a covariate in the top model, we also analyzed the plots of the behavioral state transition probabilities as a function of dB. These showed a mixed response to the dB covariate: the 1- and 5-minute models for Repetition 4, and the 30-minute model for Repetition 14 showed an increased probability of exploratory behavior at higher dB values; the other models showed either the opposite behavior of an increased probability of encamped behavior at higher dB values, or no clear association between dB values and transition probabilities.
 	
-	The weakness of dB as a predictor of behavior could be a consequence of the study design, because dB values were recorded once before the trials commenced. For the model fitting, we incorporated values into the fish location data using the kriging interpolation method. By doing this, we made the assumption that dB values throughout the pond during each repetition would be similar to when they were recorded the first time. In future studies, we plan to record dB levels for each sound repetition, in the hope that this provides a more accurate gauge of sound intensity which each fish experiences.
+	The weakness of dB as a predictor of behavior could be a consequence of the study design, because dB values were recorded once before the trials commenced. For the model fitting, we incorporated values into the carp location data using the kriging interpolation method. By doing this, we made the assumption that dB values throughout the pond during each repetition would be similar to when they were initially recorded. In future studies, we plan to record dB levels for each sound repetition, as this will provide a more accurate gauge of the sound intensity which each individual experiences.
 	
 	\bibliographystyle{apalike}
 	\bibliography{references}
