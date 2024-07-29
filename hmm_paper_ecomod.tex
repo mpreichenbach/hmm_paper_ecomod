@@ -58,26 +58,25 @@
 	
 	\section{Introduction}
 	
-	Important factors in animal behavior often vary continuously in space; these might include things like food availability, the velocity of wind or water currents, temperature, or sound intensity (which we will consider later). However, these values can only be sampled at spatially discrete points which are likely different than the positions in the animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
+	Important factors in animal behavior often vary continuously in space and time; these might include things like food availability, the velocity of wind or water currents, temperature, or the intensity of environmental noise. However, these values can only be sampled at spatially or temporally discrete points which are likely different than the positions in the recorded animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
 	
 	In the last two decades, methods to collect highly detailed data on animal movements have become easily accessible \cite{McConnell2010, Tomkiewicz2010}. This has led to rapid development in state-space models of animal behavior, and of tools to allow non-specialists to implement the models \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}.
 	
 	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
 	
+	\begin{figure}
+		\includegraphics[width=\textwidth]{track_states.png}
+		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
+		\label{img:track_states}
+	\end{figure}
+	
 	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
 	
 	\section{Model Description} \label{sec:model_description}
 	
-%	\subsection{Model Overview}
-	
-	%	In this study, we use a state-space model developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}, which uses a continuous-time correlated random-walk (CTCRW) model to predict carp locations at regular timesteps, followed by a hidden Markov model (HMM) to infer behavioral states as a function of environmental covariates. We fit models over three blocks of time: 1 minute, 5 minutes, and 30 minutes after the acoustic deterrent turned on.
-	%	
-	%	We used the R package \texttt{momentuHMM} \cite{McClintock2018} to fit the models, and performed spatial interpolations of sound intensity values with the kriging utilities in the \texttt{automap} package  \cite{Hiemstra2008}.
-	
 	In this study, we combine a movement modeling framework developed in \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018} with a kriging process to incorporate spatially continuous covariates. The movement modeling framework involves first fitting a continuous-time correlated random walk (CTCRW) to animal telemetry data, followed by fitting a Hidden Markov Model (HMM), which allows one to predict the different behavioral states of individuals based on environmental covariates. The HMM requires animal positions to be temporally regular, but this is rarely true of animal telemetry time series, so the CTCRW provides a way to predict animal positions at regular time intervals.
 	
 	 In order to incorporate a spatially varying covariate into the HMM, we utilize the kriging interpolation technique to predict values of the covariate at the regular positions provided by the CTCRW step. We note that kriging is only one of many spatial interpolation techniques, but it provides the best linear unbiased estimator at unknown locations.
-	
 	
 	\subsection{Continuous-time Correlated Random Walk (CTCRW)} \label{sec:ctcrw}
 	
@@ -327,12 +326,6 @@
 	One of the worst predictors was sound intensity (dB), though Table \ref{tbl:cov_freq} suggests that it might be a better predictor over shorter time frames. This could be explained by the fact that carp have an initial reaction to the sound deterrent, but become more habituated to it over time. The weakness of the dB covariate as a predictor could also be explained by the fact that sound intensities were recorded once before any of the trials began. In order to incorporate it into the movement model, we assumed that those recorded values, and hence the interpolated values in the ponds derived via kriging, were consistent across all $24$ repetitions of the deterrent. We describe improvements to this study design in Section \ref{sec:conclusion}.
 	
 	\subsection{State Transition Probabilities}
-	
-%	\begin{figure}
-%		\includegraphics[width=\textwidth]{track_states.png}
-%		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
-%		\label{img:track_states}
-%	\end{figure}
 	
 	To determine whether the covariate \emph{dB} had a common effect on carp behavior, we investigated plots of the state transition probabilities $\lambda_{i, j}$, with $i, j \in \{1, 2\}$, as a function of dB (re 1 $\mu$Pa). The probabilities $\lambda_{i, j}$ are modeled as multinomial logit functions, the details of which are given in \cite{Michelot2016}. These plots indicate how the probability of changing behavioral states is correlated with changes to dB levels in the pond. Recall that $\lambda_{i, j}$ gives the probability that an individual will be in behavioral state $j$ at time $n+1$, given that they are in behavioral state $i$ at time $n$. Also, since we only consider two behavioral states, we have the identities
 	\begin{align*}
