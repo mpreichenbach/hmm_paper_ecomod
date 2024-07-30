@@ -35,7 +35,7 @@
 %		Silver carp (\emph{Hypophthalmychthys molitrix}) are one of four primary species of invasive cyprinids in the Mississippi River Basin. They threaten the ecosystems in which they have been introduced by competing with native planktivores and the early life stages of other native fishes. Additionally, silver carp can injure recreational boaters, thus causing negative economic impacts. To mitigate their spread, non-physical barriers such as electrical barriers, bubble curtains, carbon dioxide, and acoustic deterrents have been installed at locks and dams throughout the Mississippi River Basin. In this article, we focus on acoustic deterrents, and investigate their effect on behavioral changes on silver carp, using data from a 2018 pond study performed at the Columbia Environmental Research Center. We use a modeling approach combining continuous-time correlated random walks with a hidden Markov model for two behavioral states. We incorporate interpolated sound-intensity values from the acoustic deterrent as a novel covariate. We also investigate the effect of pond-surface temperature and diel effects on silver carp behavior changes.
 	\end{abstract}
 	
-	\title{Modeling Behavioral Changes of Invasive Carp in Response to Acoustic Deterrents}
+	\title{Incorporating Interpolated Values of Environmental Variables into Hidden Markov Models for Animal Movement}
 	\author{
 		Reichenbach, Matthew \\
 		\texttt{matt.reichenbach@colorado.edu}
@@ -438,6 +438,8 @@
 	For the sound repetitions in which dB occurred as a covariate in the top model, we also analyzed the plots of the behavioral state transition probabilities as a function of dB. These showed a mixed response to the dB covariate: the 1- and 5-minute models for Repetition 4, and the 30-minute model for Repetition 14 showed an increased probability of exploratory behavior at higher dB values; the other models showed either the opposite behavior of an increased probability of encamped behavior at higher dB values, or no clear association between dB values and transition probabilities.
 	
 	The weakness of dB as a predictor of behavior could be a consequence of the study design, because dB values were recorded once before the trials commenced. For the model fitting, we incorporated values into the carp location data using the kriging interpolation method. By doing this, we made the assumption that dB values throughout the pond during each repetition would be similar to when they were initially recorded. In future studies, we plan to record dB levels for each sound repetition, as this will provide a more accurate gauge of the sound intensity which each individual experiences.
+	
+	Besides investigating the effects of acoustic deterrents on carp behavior, the secondary goal of the pond study was to demonstrate how to incorporate continuous environmental covariates into a commonly used behavioral modeling process. We found that it was straightforward to incorporate interpolated values of environmental variables into this process, and that the software described in \cite{McClintock2018} provides sufficient resources to both fit and evaluate these models.
 	
 	\bibliographystyle{apalike}
 	\bibliography{references}
