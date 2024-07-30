@@ -58,19 +58,18 @@
 	
 	\section{Introduction}
 	
-	Important factors in animal behavior often vary continuously in space and time; these might include things like food availability, the velocity of wind or water currents, temperature, or the intensity of environmental noise. However, these values can only be sampled at spatially or temporally discrete points which are likely different than the positions in the recorded animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
-	
 	In the last two decades, methods to collect highly detailed data on animal movements have become easily accessible \cite{McConnell2010, Tomkiewicz2010}. This has led to rapid development in state-space models of animal behavior, and of tools to allow non-specialists to implement the models \cite{Johnson2008, McClintock2012, Michelot2016, Whoriskey2017, McClintock2018}.
 	
-	HMMs are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. We assume that the fish exhibit two behavioral states, which we denote ``exploratory" and ``encamped"; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}).
-	
+	Hidden Markov models (HMMs) are particularly well-suited to studying the behavioral changes of fish in response to environmental stimuli, because they attempt to identify hidden ``states" given observed data \cite{Rabiner1989}. A behavior pattern common to many species is movement divided between ``exploratory" and ``encamped" states; the former is characterized by directed motion at a greater speed, and the latter is characterized by random (uniform) motion at slower speeds (see Figure \ref{img:track_states}). These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}, which are all mammals. There have also been a few studies of fish movement using HMMs, and in our pond study application in \ref{sec:pond-study}, we will model carp behavior with these two states.
+
 	\begin{figure}
-		\includegraphics[width=\textwidth]{track_states.png}
+		\centering
+		\includegraphics[width=0.75\textwidth]{track_states.png}
 		\caption{Behavioral states of a 5-minute track, as predicted by an application of the Viterbi algorithm to a fitted HMM model.}
 		\label{img:track_states}
 	\end{figure}
 	
-	These two states describe motion in many species, such as elk \cite{Morales2004, Fryxell2008}, gray brocket deer \cite{Grotta-Neto2019}, elephants \cite{Roever2014, Vogel2019}, and gray seals \cite{Breed2009}. Though these are mammalian examples, with only one aquatic species, a visual inspection of the carp telemetry data indicates that individuals do exhibit encamped and exploratory behaviors as well.
+	An advantage of using HMMs to model animal behavior is that they can incorporate environmental variables into the formulas for parameters like the mean step length, turning angle, and behavioral state transition probabilities. This allows researchers to study the relationship between environmental covariates and animal behavior. Previous studies have incorporated categorical variables like diel changes (day/night),  Important factors in animal behavior often vary continuously in space and time; these might include things like food availability, the velocity of wind or water currents, temperature, or as we will see in Section \ref{sec:pond-study}, the intensity of environmental noise. However, these values can only be sampled discretely, at positions which are likely different than the positions in the recorded animal telemetry. In order to associate a value of spatially continuous covariates with each animal position predicted by the CTCRW, we propose the kriging method of spatial interpolation.
 	
 	\section{Model Description} \label{sec:model_description}
 	
@@ -119,8 +118,6 @@
 	In order to incorporate the interpolated values into the HMM for behavioral states, one can simply evaluate the function $\hat z$ from the kriging process at each location predicted by the CTCRW. This will give an interpolated value of the environmental variable at each predicted location of the individuals, which is a necessary step when the variable can only be sampled at finitely many points.
 	
 	In the application we describe in Section \ref{sec:pond-study}, we use kriging to interpolate underwater sound intensity values in order to quantify the behavioral response of invasive carp to acoustic deterrents. A number of other researchers have successfully used kriging to interpolate sound intensities, both in air \cite{Baume2008, Bostanci2018} and in water \cite{Sun2018}.
-	
-	\section{Model Evaluation}
 	
 	\section{Application to a Pond Study} \label{sec:pond-study}
 		
